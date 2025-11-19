@@ -253,20 +253,6 @@ input:checked + .slider:before {
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
-.close-btn {
-    position: absolute;
-    right: var(--spacing-md);
-    top: var(--spacing-md);
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--text-muted);
-    transition: color 0.2s ease;
-}
-
-.close-btn:hover {
-    color: var(--text-primary);
-}
-
 .modal-header {
     display: flex;
     justify-content: space-between;
