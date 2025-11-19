@@ -556,15 +556,26 @@ body.light-theme .btn-delete-confirm:hover {
     }
     
     .modal-header {
-        flex-direction: column;
+        flex-direction: row;
         gap: var(--spacing-sm);
-        align-items: flex-start;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
+    /* Asegurar que el texto y botón quepan en una línea */
+    .modal-title-container span {
+        font-size: 1.1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex-shrink: 1;
+        min-width: 0;
     }
     
-    .modal-title-container {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-sm);
+    .delete-card-btn {
+        flex-shrink: 0; /* Evitar que el botón se encoja */
+        white-space: nowrap;
+        padding: 6px 10px;
+        font-size: 0.8rem;
     }
 }
 
