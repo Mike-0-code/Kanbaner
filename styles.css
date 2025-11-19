@@ -344,6 +344,90 @@ input:checked + .slider:before {
     background-color: var(--accent-hover);
 }
 
+/* ===== TEMA CLARO ===== */
+body.light-theme {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f1f5f9;
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --accent-primary: #3b82f6;
+    --accent-hover: #2563eb;
+    --border-color: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Ajustes específicos para tema claro */
+body.light-theme .top-bar {
+    background-color: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+body.light-theme .column {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .card {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme .card:hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme .add-card-btn {
+    background-color: var(--bg-tertiary);
+    border: 2px dashed var(--border-color);
+    color: var(--text-secondary);
+}
+
+body.light-theme .add-card-btn:hover {
+    background-color: var(--bg-secondary);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+body.light-theme .modal-content {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+body.light-theme #card-title,
+body.light-theme #card-desc {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+}
+
+body.light-theme .btn-cancel {
+    background-color: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+body.light-theme .btn-cancel:hover {
+    background-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+/* Asegurar que el switch se vea bien en tema claro */
+body.light-theme .slider {
+    background-color: #cbd5e1;
+}
+
+body.light-theme input:checked + .slider {
+    background-color: var(--accent-primary);
+}
+
+body.light-theme .slider:before {
+    background-color: #ffffff;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
     .board-container {
