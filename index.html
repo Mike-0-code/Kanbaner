@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanbaner - Tu tablero de tareas simple</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+    <!-- Barra superior -->
+    <header class="top-bar">
+        <h1 class="app-name">Kanbaner</h1>
+        <div class="theme-switch">
+            <label class="switch">
+                <input type="checkbox" id="theme-toggle">
+                <span class="slider"></span>
+            </label>
+            <span class="theme-label">Tema</span>
+        </div>
+    </header>
+
+    <!-- Contenedor principal -->
+    <main class="board-container">
+        <!-- Columna: Por Hacer -->
+        <section class="column" id="todo-column">
+            <h2 class="column-title">Por Hacer</h2>
+            <div class="cards-container" id="todo-cards">
+                <!-- Las tarjetas se generarán aquí dinámicamente -->
+            </div>
+            <button class="add-card-btn" onclick="openCardModal('todo')">
+                + Agregar tarjeta
+            </button>
+        </section>
+
+        <!-- Columna: En Progreso -->
+        <section class="column" id="progress-column">
+            <h2 class="column-title">En Progreso</h2>
+            <div class="cards-container" id="progress-cards">
+                <!-- Las tarjetas se generarán aquí dinámicamente -->
+            </div>
+            <button class="add-card-btn" onclick="openCardModal('progress')">
+                + Agregar tarjeta
+            </button>
+        </section>
+
+        <!-- Columna: Hecho -->
+        <section class="column" id="done-column">
+            <h2 class="column-title">Hecho</h2>
+            <div class="cards-container" id="done-cards">
+                <!-- Las tarjetas se generarán aquí dinámicamente -->
+            </div>
+            <button class="add-card-btn" onclick="openCardModal('done')">
+                + Agregar tarjeta
+            </button>
+        </section>
+    </main>
+
+    <!-- Modal para crear/editar tarjetas -->
+    <div id="card-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeCardModal()">&times;</span>
+            <h3 id="modal-title">Nueva Tarjeta</h3>
+            
+            <form id="card-form">
+                <div class="form-group">
+                    <label for="card-title">Título <span class="char-count" id="title-count">0/60</span></label>
+                    <input type="text" id="card-title" maxlength="60" placeholder="¿Qué necesitas hacer?" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="card-desc">Descripción <span class="char-count" id="desc-count">0/140</span></label>
+                    <textarea id="card-desc" maxlength="140" placeholder="Detalles adicionales (opcional)"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeCardModal()">Cancelar</button>
+                    <button type="submit" class="btn-save">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
