@@ -10,7 +10,7 @@ let currentColumn = null;
 let pendingDelete = null;
 
 // ===== INICIALIZACIÓN =====
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
     renderAllColumns();
     setupEventListeners();
@@ -25,9 +25,7 @@ function saveToStorage() {
 
 function loadFromStorage() {
     const saved = localStorage.getItem('kanbaner-data');
-    if (saved) {
-        kanbanState = JSON.parse(saved);
-    }
+    if (saved) kanbanState = JSON.parse(saved);
 }
 
 // ===== RENDERIZADO =====
@@ -42,8 +40,7 @@ function renderColumn(columnId, cards) {
     container.innerHTML = '';
 
     cards.forEach((card, index) => {
-        const cardElement = createCardElement(card, columnId, index);
-        container.appendChild(cardElement);
+        container.appendChild(createCardElement(card, columnId, index));
     });
 }
 
@@ -54,7 +51,6 @@ function createCardElement(card, columnId, index) {
     cardDiv.setAttribute('data-column', columnId);
     cardDiv.setAttribute('data-index', index);
 
-    // Click en TODA la tarjeta para editar
     cardDiv.addEventListener('click', () => editCard(columnId, index));
 
     cardDiv.innerHTML = `
@@ -72,17 +68,25 @@ function openCardModal(column) {
     currentColumn = column;
     currentEditingCard = null;
     
-    document.getElementById('modal-title').textContent = 'Nueva Tarjeta';
+    document.getElementById('modal-title').innerHTML = `
+        <div class="modal-header">
+            <div class="modal-title-container">
+                <span>Nueva Tarjeta</span>
+                <div style="width: 70px;"></div> <!-- Espacio para alineación -->
+            </div>
+        </div>
+    `;
+    
     document.getElementById('card-title').value = '';
     document.getElementById('card-desc').value = '';
     updateCharCounters();
     
-    document.getElementById('card-modal').style.display = 'block';
+    showModal('card-modal');
     document.getElementById('card-title').focus();
 }
 
 function closeCardModal() {
-    document.getElementById('card-modal').style.display = 'none';
+    hideModal('card-modal');
     currentEditingCard = null;
     currentColumn = null;
 }
@@ -93,11 +97,13 @@ function editCard(column, index) {
     const card = kanbanState[column][index];
     
     document.getElementById('modal-title').innerHTML = `
-        <div class="modal-title-container">
-            <span>Editar Tarjeta</span>
-            <button type="button" class="delete-card-btn" onclick="event.stopPropagation(); confirmDeleteCard('${column}', ${index})">
-                Eliminar
-            </button>
+        <div class="modal-header">
+            <div class="modal-title-container">
+                <span>Editar Tarjeta</span>
+                <button type="button" class="delete-card-btn" onclick="event.stopPropagation(); confirmDeleteCard('${column}', ${index})">
+                    Eliminar
+                </button>
+            </div>
         </div>
     `;
     
@@ -105,7 +111,7 @@ function editCard(column, index) {
     document.getElementById('card-desc').value = card.description || '';
     updateCharCounters();
     
-    document.getElementById('card-modal').style.display = 'block';
+    showModal('card-modal');
     document.getElementById('card-title').focus();
 }
 
@@ -143,18 +149,18 @@ function confirmDeleteCard(column, index) {
     document.getElementById('confirm-message').textContent = 
         `¿Estás seguro de que quieres eliminar la tarjeta "${card.title}"?`;
     
-    document.getElementById('confirm-modal').style.display = 'block';
+    showModal('confirm-modal');
 }
 
 function setupConfirmModal() {
     document.getElementById('confirm-cancel').addEventListener('click', closeConfirmModal);
     document.getElementById('confirm-delete').addEventListener('click', executeDelete);
     
-    document.getElementById('confirm-modal').addEventListener('click', function(e) {
-        if (e.target === this) closeConfirmModal();
+    document.getElementById('confirm-modal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeConfirmModal();
     });
     
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && document.getElementById('confirm-modal').style.display === 'block') {
             closeConfirmModal();
         }
@@ -162,7 +168,7 @@ function setupConfirmModal() {
 }
 
 function closeConfirmModal() {
-    document.getElementById('confirm-modal').style.display = 'none';
+    hideModal('confirm-modal');
     pendingDelete = null;
 }
 
@@ -176,32 +182,27 @@ function executeDelete() {
 
 // ===== EVENT LISTENERS =====
 function setupEventListeners() {
-    // Formulario de tarjeta
     document.getElementById('card-form').addEventListener('submit', handleFormSubmit);
-    
-    // Contadores de caracteres
     document.getElementById('card-title').addEventListener('input', updateCharCounters);
     document.getElementById('card-desc').addEventListener('input', updateCharCounters);
     
-    // Cerrar modal al hacer click fuera
-    document.getElementById('card-modal').addEventListener('click', function(e) {
-        if (e.target === this) closeCardModal();
+    document.getElementById('card-modal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeCardModal();
     });
     
-    // Switch de tema
-    document.getElementById('theme-toggle').addEventListener('change', function() {
-        document.body.classList.toggle('dark-theme', !this.checked);
-        document.body.classList.toggle('light-theme', this.checked);
+    document.getElementById('theme-toggle').addEventListener('change', (e) => {
+        document.body.classList.toggle('dark-theme', !e.target.checked);
+        document.body.classList.toggle('light-theme', e.target.checked);
     });
 }
 
 function handleFormSubmit(e) {
     e.preventDefault();
     
-    const title = document.getElementById('card-title').value;
-    const description = document.getElementById('card-desc').value;
+    const title = document.getElementById('card-title').value.trim();
+    const description = document.getElementById('card-desc').value.trim();
     
-    if (!title.trim()) {
+    if (!title) {
         alert('El título es obligatorio');
         return;
     }
@@ -216,18 +217,16 @@ function handleFormSubmit(e) {
 }
 
 function updateCharCounters() {
-    const titleInput = document.getElementById('card-title');
-    const descInput = document.getElementById('card-desc');
+    const titleLength = document.getElementById('card-title').value.length;
+    const descLength = document.getElementById('card-desc').value.length;
     
-    document.getElementById('title-count').textContent = `${titleInput.value.length}/60`;
-    document.getElementById('desc-count').textContent = `${descInput.value.length}/140`;
+    document.getElementById('title-count').textContent = `${titleLength}/60`;
+    document.getElementById('desc-count').textContent = `${descLength}/140`;
 }
 
 // ===== DRAG AND DROP =====
 function setupDragAndDrop() {
-    const columns = document.querySelectorAll('.cards-container');
-    
-    columns.forEach(column => {
+    document.querySelectorAll('.cards-container').forEach(column => {
         column.addEventListener('dragover', handleDragOver);
         column.addEventListener('drop', handleDrop);
     });
@@ -275,6 +274,14 @@ function moveCard(fromColumn, fromIndex, toColumn) {
 }
 
 // ===== UTILIDADES =====
+function showModal(modalId) {
+    document.getElementById(modalId).style.display = 'block';
+}
+
+function hideModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
@@ -284,8 +291,7 @@ function escapeHtml(text) {
 function formatDate(isoString) {
     const date = new Date(isoString);
     const now = new Date();
-    const diffTime = now - date;
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
     
     if (diffDays === 0) {
         return `Hoy ${date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
