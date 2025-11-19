@@ -7,6 +7,7 @@ let kanbanState = {
 
 let currentEditingCard = null;
 let currentColumn = null;
+let pendingDelete = null;
 
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', function() {
@@ -53,19 +54,20 @@ function createCardElement(card, columnId, index) {
     cardDiv.setAttribute('data-column', columnId);
     cardDiv.setAttribute('data-index', index);
 
+    // Click en TODA la tarjeta para editar
+    cardDiv.addEventListener('click', () => editCard(columnId, index));
+
     cardDiv.innerHTML = `
-        <div class="card-title" onclick="editCard('${columnId}', ${index})">${escapeHtml(card.title)}</div>
-        ${card.description ? `<div class="card-desc" onclick="editCard('${columnId}', ${index})">${escapeHtml(card.description)}</div>` : ''}
+        <div class="card-title">${escapeHtml(card.title)}</div>
+        ${card.description ? `<div class="card-desc">${escapeHtml(card.description)}</div>` : ''}
         <div class="card-date">${formatDate(card.createdAt)}</div>
     `;
 
-    // Eventos de drag and drop
     setupCardDragEvents(cardDiv);
-
     return cardDiv;
 }
 
-// ===== MODAL Y FORMULARIO =====
+// ===== MODALES =====
 function openCardModal(column) {
     currentColumn = column;
     currentEditingCard = null;
@@ -73,8 +75,7 @@ function openCardModal(column) {
     document.getElementById('modal-title').textContent = 'Nueva Tarjeta';
     document.getElementById('card-title').value = '';
     document.getElementById('card-desc').value = '';
-    document.getElementById('title-count').textContent = '0/60';
-    document.getElementById('desc-count').textContent = '0/140';
+    updateCharCounters();
     
     document.getElementById('card-modal').style.display = 'block';
     document.getElementById('card-title').focus();
@@ -94,7 +95,7 @@ function editCard(column, index) {
     document.getElementById('modal-title').innerHTML = `
         <div class="modal-title-container">
             <span>Editar Tarjeta</span>
-            <button type="button" class="delete-card-btn" onclick="confirmDeleteCard('${column}', ${index})">
+            <button type="button" class="delete-card-btn" onclick="event.stopPropagation(); confirmDeleteCard('${column}', ${index})">
                 Eliminar
             </button>
         </div>
@@ -134,93 +135,84 @@ function deleteCard(column, index) {
     renderColumn(column, kanbanState[column]);
 }
 
-// ===== MODAL DE CONFIRMACIÓN =====
-let pendingDelete = null;
-
+// ===== CONFIRMACIÓN DE ELIMINACIÓN =====
 function confirmDeleteCard(column, index) {
     const card = kanbanState[column][index];
     pendingDelete = { column, index };
     
-    // Actualizar mensaje
     document.getElementById('confirm-message').textContent = 
         `¿Estás seguro de que quieres eliminar la tarjeta "${card.title}"?`;
     
-    // Mostrar modal de confirmación
     document.getElementById('confirm-modal').style.display = 'block';
 }
 
 function setupConfirmModal() {
-    document.getElementById('confirm-cancel').addEventListener('click', function() {
-        document.getElementById('confirm-modal').style.display = 'none';
-        pendingDelete = null;
-    });
+    document.getElementById('confirm-cancel').addEventListener('click', closeConfirmModal);
+    document.getElementById('confirm-delete').addEventListener('click', executeDelete);
     
-    document.getElementById('confirm-delete').addEventListener('click', function() {
-        if (pendingDelete) {
-            deleteCard(pendingDelete.column, pendingDelete.index);
-            document.getElementById('confirm-modal').style.display = 'none';
-            closeCardModal(); // Cerrar también el modal de edición
-            pendingDelete = null;
-        }
-    });
-    
-    // Cerrar al hacer click fuera
     document.getElementById('confirm-modal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            document.getElementById('confirm-modal').style.display = 'none';
-            pendingDelete = null;
-        }
+        if (e.target === this) closeConfirmModal();
     });
     
-    // Cerrar con ESC
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && document.getElementById('confirm-modal').style.display === 'block') {
-            document.getElementById('confirm-modal').style.display = 'none';
-            pendingDelete = null;
+            closeConfirmModal();
         }
     });
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirm-modal').style.display = 'none';
+    pendingDelete = null;
+}
+
+function executeDelete() {
+    if (pendingDelete) {
+        deleteCard(pendingDelete.column, pendingDelete.index);
+        closeConfirmModal();
+        closeCardModal();
+    }
 }
 
 // ===== EVENT LISTENERS =====
 function setupEventListeners() {
     // Formulario de tarjeta
-    document.getElementById('card-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const title = document.getElementById('card-title').value;
-        const description = document.getElementById('card-desc').value;
-        
-        if (!title.trim()) {
-            alert('El título es obligatorio');
-            return;
-        }
-
-        if (currentEditingCard !== null) {
-            updateCard(currentColumn, currentEditingCard, title, description);
-        } else {
-            addCard(currentColumn, title, description);
-        }
-        
-        closeCardModal();
-        setupConfirmModal();
-    });
-
+    document.getElementById('card-form').addEventListener('submit', handleFormSubmit);
+    
     // Contadores de caracteres
     document.getElementById('card-title').addEventListener('input', updateCharCounters);
     document.getElementById('card-desc').addEventListener('input', updateCharCounters);
-
+    
     // Cerrar modal al hacer click fuera
     document.getElementById('card-modal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeCardModal();
-        }
+        if (e.target === this) closeCardModal();
     });
-
+    
     // Switch de tema
     document.getElementById('theme-toggle').addEventListener('change', function() {
         document.body.classList.toggle('dark-theme', !this.checked);
         document.body.classList.toggle('light-theme', this.checked);
     });
+}
+
+function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    const title = document.getElementById('card-title').value;
+    const description = document.getElementById('card-desc').value;
+    
+    if (!title.trim()) {
+        alert('El título es obligatorio');
+        return;
+    }
+
+    if (currentEditingCard !== null) {
+        updateCard(currentColumn, currentEditingCard, title, description);
+    } else {
+        addCard(currentColumn, title, description);
+    }
+    
+    closeCardModal();
 }
 
 function updateCharCounters() {
@@ -231,34 +223,7 @@ function updateCharCounters() {
     document.getElementById('desc-count').textContent = `${descInput.value.length}/140`;
 }
 
-// ===== UTILIDADES =====
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function formatDate(isoString) {
-    const date = new Date(isoString);
-    const now = new Date();
-    const diffTime = now - date;
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) {
-        return `Hoy ${date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
-    } else if (diffDays === 1) {
-        return `Ayer ${date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
-    } else {
-        return date.toLocaleDateString('es-ES', { 
-            day: 'numeric', 
-            month: 'short',
-            hour: '2-digit', 
-            minute: '2-digit'
-        });
-    }
-}
-
-// ===== DRAG AND DROP (Fase básica) =====
+// ===== DRAG AND DROP =====
 function setupDragAndDrop() {
     const columns = document.querySelectorAll('.cards-container');
     
@@ -307,4 +272,31 @@ function moveCard(fromColumn, fromIndex, toColumn) {
     
     saveToStorage();
     renderAllColumns();
+}
+
+// ===== UTILIDADES =====
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatDate(isoString) {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diffTime = now - date;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+        return `Hoy ${date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+    } else if (diffDays === 1) {
+        return `Ayer ${date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+    } else {
+        return date.toLocaleDateString('es-ES', { 
+            day: 'numeric', 
+            month: 'short',
+            hour: '2-digit', 
+            minute: '2-digit'
+        });
+    }
 }
