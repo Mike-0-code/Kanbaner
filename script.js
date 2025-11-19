@@ -128,20 +128,56 @@ function updateCard(column, index, title, description) {
 }
 
 function deleteCard(column, index) {
-    if (confirm('¿Estás seguro de que quieres eliminar esta tarjeta?')) {
-        kanbanState[column].splice(index, 1);
-        saveToStorage();
-        renderColumn(column, kanbanState[column]);
-    }
+    kanbanState[column].splice(index, 1);
+    saveToStorage();
+    renderColumn(column, kanbanState[column]);
 }
+
+// ===== MODAL DE CONFIRMACIÓN =====
+let pendingDelete = null;
 
 function confirmDeleteCard(column, index) {
     const card = kanbanState[column][index];
+    pendingDelete = { column, index };
     
-    if (confirm(`¿Estás seguro de que quieres eliminar la tarjeta "${card.title}"?\n\nEsta acción no se puede deshacer.`)) {
-        deleteCard(column, index);
-        closeCardModal();
-    }
+    // Actualizar mensaje
+    document.getElementById('confirm-message').textContent = 
+        `¿Estás seguro de que quieres eliminar la tarjeta "${card.title}"?`;
+    
+    // Mostrar modal de confirmación
+    document.getElementById('confirm-modal').style.display = 'block';
+}
+
+function setupConfirmModal() {
+    document.getElementById('confirm-cancel').addEventListener('click', function() {
+        document.getElementById('confirm-modal').style.display = 'none';
+        pendingDelete = null;
+    });
+    
+    document.getElementById('confirm-delete').addEventListener('click', function() {
+        if (pendingDelete) {
+            deleteCard(pendingDelete.column, pendingDelete.index);
+            document.getElementById('confirm-modal').style.display = 'none';
+            closeCardModal(); // Cerrar también el modal de edición
+            pendingDelete = null;
+        }
+    });
+    
+    // Cerrar al hacer click fuera
+    document.getElementById('confirm-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            document.getElementById('confirm-modal').style.display = 'none';
+            pendingDelete = null;
+        }
+    });
+    
+    // Cerrar con ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('confirm-modal').style.display === 'block') {
+            document.getElementById('confirm-modal').style.display = 'none';
+            pendingDelete = null;
+        }
+    });
 }
 
 // ===== EVENT LISTENERS =====
@@ -165,6 +201,7 @@ function setupEventListeners() {
         }
         
         closeCardModal();
+        setupConfirmModal();
     });
 
     // Contadores de caracteres
