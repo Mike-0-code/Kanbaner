@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (!localStorage.getItem('kanbanner_fechas_actualizadas')) {
         updateExistingDates();
-        localStorage.setItem('kanbanner_fechas_actualizadas', 'true');
+        localStorage.setItem('kanbanner_fechas_actualizadas', Date.now().toString());
     }
     
     renderAllColumns();
