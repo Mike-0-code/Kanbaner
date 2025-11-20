@@ -36,7 +36,7 @@ function setupInfoTooltip() {
     
     tooltip.className = 'info-tooltip';
     tooltip.innerHTML = `
-        <div class="tooltip-title">💾 Almacenamiento Local</div>
+        <div class="tooltip-title">Almacenamiento Local</div>
         <div class="tooltip-text">
             Tus tareas se guardan automáticamente en este navegador. 
             Si limpias el historial o cambias de navegador, se reiniciará el tablero.
