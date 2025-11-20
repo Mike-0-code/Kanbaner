@@ -71,8 +71,8 @@ function openCardModal(column) {
     document.getElementById('modal-title').innerHTML = `
         <div class="modal-header">
             <div class="modal-title-container">
-                <span>Nueva Tarjeta</span>
-                <div style="width: 70px;"></div> <!-- Espacio para alineación -->
+                <span>Nueva Tarea</span>
+                <div style="width: 70px;"></div>
             </div>
         </div>
     `;
@@ -99,7 +99,7 @@ function editCard(column, index) {
     document.getElementById('modal-title').innerHTML = `
         <div class="modal-header">
             <div class="modal-title-container">
-                <span>Editar Tarjeta</span>
+                <span>Editar Tarea</span>
                 <button type="button" class="delete-card-btn" onclick="event.stopPropagation(); confirmDeleteCard('${column}', ${index})">
                     Eliminar
                 </button>
@@ -115,7 +115,7 @@ function editCard(column, index) {
     document.getElementById('card-title').focus();
 }
 
-// ===== GESTIÓN DE TARJETAS =====
+// ===== GESTIÓN DE TAREAS =====
 function addCard(column, title, description) {
     const newCard = {
         title: title.trim(),
@@ -147,7 +147,7 @@ function confirmDeleteCard(column, index) {
     pendingDelete = { column, index };
     
     document.getElementById('confirm-message').textContent = 
-        `¿Estás seguro de que quieres eliminar la tarjeta "${card.title}"?`;
+        `¿Estás seguro de que quieres eliminar la tarea "${card.title}"?`;
     
     showModal('confirm-modal');
 }
