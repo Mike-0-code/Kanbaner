@@ -12,6 +12,13 @@ let pendingDelete = null;
 // ===== INICIALIZACIÓN =====
 document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
+    
+    if (!localStorage.getItem('kanbanner_fechas_actualizadas')) {
+        console.log('🔄 Actualizando fechas automáticamente...');
+        updateExistingDates();
+        localStorage.setItem('kanbanner_fechas_actualizadas', 'true');
+    }
+
     renderAllColumns();
     setupEventListeners();
     setupDragAndDrop();
