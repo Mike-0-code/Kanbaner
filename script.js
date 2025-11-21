@@ -336,7 +336,7 @@ function formatDate(isoString) {
     const noteDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
     const diffTime = today - noteDate;
-    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     
     if (diffDays === 0) {
         return `Hoy ${date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
